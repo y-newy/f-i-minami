@@ -1,0 +1,110 @@
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>給食アンケート</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .page {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+    }
+    #page1 {
+      background-color: #004d40;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #page2 {
+      background-color: black;
+      color: red;
+      text-align: center;
+      padding-top: 100px;
+      font-size: 1.5em;
+    }
+    #page2 .blink {
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    #page2 .info {
+      color: white;
+      margin-top: 30px;
+      font-size: 0.9em;
+    }
+    #page3 {
+      background: white;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 2em;
+    }
+    button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      margin-top: 1em;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- アンケート画面 -->
+  <div id="page1" class="page" style="display:block;">
+    <h1>好きな給食メニューを教えてください</h1>
+    <form id="surveyForm">
+      <input type="text" name="menu" placeholder="例：カレー、揚げパン" required>
+      <br>
+      <button type="submit">送信</button>
+    </form>
+  </div>
+
+  <!-- 登録完了画面 -->
+  <div id="page2" class="page">
+    <h1 class="blink">登録が完了しました</h1>
+    <p>ご利用料金：200,000円</p>
+    <p>3日以内に以下の口座にお振込みください。</p>
+    <p>さいたまりそな銀行 太宮支店 普通 3302451 ｱﾗｲﾋﾞﾙｼﾞﾝｸﾞ</p>
+    <div class="info">
+      <p>IPアドレスを取得しました：192.168.0.<span id="randomNum"></span></p>
+      <p>地域を判定しました：Japan, Saitama, 3001-komuro-inacity-kitaadati</p>
+      <p>※2025年6月20日23時59分までに振り込みが確認できない場合、法的措置に移ります。</p>
+      <p><a href="#" onclick="gotoPage(3)">お問い合わせ・解約手続きはこちら</a></p>
+    </div>
+  </div>
+
+  <!-- ネタバラしページ -->
+  <div id="page3" class="page">
+    <div class="container">
+      <h1 style="font-size: 2.5em; color: #e60033;">これは今回の授業用に乳井が作成した疑似体験ページです！</h1>
+      <p style="font-size: 1.4em; color: #333;">安心してください。あなたの情報は送信されていません。</p>
+      <p style="font-size: 1.2em; color: #0066cc;">このページは、ワンクリック詐欺の疑似体験ページです。</p>
+      <p style="font-size: 1.1em; color: #00aa00;">とにもかくにも解約ページに飛ぼうとしませんでしたか？冷静に確認すること・危険性のあるサイトには近づかないことが大切です！</p>
+    </div>
+  </div>
+
+  <script>
+    function gotoPage(pageNum) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.querySelector('#page' + pageNum).style.display = 'block';
+    }
+
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (confirm("データを送信します。よろしいですか？")) {
+        document.getElementById('randomNum').textContent = Math.floor(Math.random() * 255);
+        gotoPage(2);
+      }
+    });
+  </script>
+</body>
+</html>
