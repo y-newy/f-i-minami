@@ -24,7 +24,7 @@
       background-color: black;
       color: red;
       text-align: center;
-      padding-top: 100px;
+      padding-top: 60px;
       font-size: 1.5em;
     }
     #page2 .blink {
@@ -37,6 +37,31 @@
       color: white;
       margin-top: 30px;
       font-size: 0.9em;
+    }
+    #countdown {
+      font-size: 1.2em;
+      color: yellow;
+      margin-top: 10px;
+    }
+    #deadline {
+      font-size: 1.1em;
+      color: #ffcccc;
+    }
+    #warning-link {
+      display: inline-block;
+      margin-top: 40px;
+      padding: 1em;
+      border: 3px solid red;
+      background-color: #111;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    #warning-link:hover {
+      background-color: #300;
+      color: #fff;
     }
     #page3 {
       background: white;
@@ -58,7 +83,9 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- アンケート画面 -->
+
+  <audio id="alertSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
   <div id="page1" class="page" style="display:block;">
     <h1>好きな給食メニューを教えてください</h1>
     <form id="surveyForm">
@@ -68,34 +95,87 @@
     </form>
   </div>
 
-  <!-- 登録完了画面 -->
   <div id="page2" class="page">
     <h1 class="blink">登録が完了しました</h1>
     <p>ご利用料金：200,000円</p>
     <p>3日以内に以下の口座にお振込みください。</p>
     <p>さいたまりそな銀行 太宮支店 普通 3302451 ｱﾗｲﾋﾞﾙｼﾞﾝｸﾞ</p>
+    <div id="deadline"></div>
+    <div id="countdown"></div>
     <div class="info">
       <p>IPアドレスを取得しました：192.168.0.<span id="randomNum"></span></p>
       <p>地域を判定しました：Japan, Saitama, 3001-komuro-inacity-kitaadati</p>
-      <p>※2025年6月20日23時59分までに振り込みが確認できない場合、法的措置に移ります。</p>
-      <p><a href="#" onclick="gotoPage(3)">お問い合わせ・解約手続きはこちら</a></p>
+      <p>※期限を過ぎた場合、いかなる理由でも法的措置を取らせていただきます。</p>
     </div>
+    <a href="#" id="warning-link" onclick="gotoPage(3)">お問い合わせ・解約手続きはこちら</a>
   </div>
 
-  <!-- ネタバラしページ -->
   <div id="page3" class="page">
     <div class="container">
       <h1 style="font-size: 2.5em; color: #e60033;">これは今回の授業用に乳井が作成した疑似体験ページです！</h1>
       <p style="font-size: 1.4em; color: #333;">安心してください。あなたの情報は送信されていません。</p>
-      <p style="font-size: 1.4em; color: #333">このページは、ワンクリック詐欺の疑似体験ページです。</p>
+      <p style="font-size: 1.4em; color: #333;">このページは、ワンクリック詐欺の疑似体験ページです。</p>
       <p style="font-size: 1.4em; color: #333;">とにもかくにも解約ページに飛ぼうとしませんでしたか？冷静に確認すること・危険性のあるサイトには近づかないことが大切です！</p>
     </div>
   </div>
 
   <script>
+    let isOnPage2 = false;
+    let deadlineTimestamp;
+
     function gotoPage(pageNum) {
       document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
       document.querySelector('#page' + pageNum).style.display = 'block';
+
+      if (pageNum === 2) {
+        isOnPage2 = true;
+
+        const alertSound = document.getElementById('alertSound');
+        alertSound.currentTime = 0;
+        alertSound.play().catch(e => {});
+
+        window.addEventListener("beforeunload", beforeUnloadHandler);
+
+        const now = new Date();
+        deadlineTimestamp = now.getTime() + 72 * 60 * 60 * 1000;
+        const deadlineDate = new Date(deadlineTimestamp);
+        document.getElementById('deadline').textContent =
+          "振込期限：" + deadlineDate.toLocaleString('ja-JP');
+
+        startCountdown();
+      } else {
+        isOnPage2 = false;
+        window.removeEventListener("beforeunload", beforeUnloadHandler);
+      }
+    }
+
+    function beforeUnloadHandler(e) {
+      if (isOnPage2) {
+        const message = "いかなる理由でも支払いをしない場合は法的措置対象となります。";
+        e.preventDefault();
+        e.returnValue = message;
+        return message;
+      }
+    }
+
+    function startCountdown() {
+      const countdownEl = document.getElementById('countdown');
+      function updateCountdown() {
+        const now = new Date().getTime();
+        let remaining = deadlineTimestamp - now;
+        if (remaining < 0) remaining = 0;
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        countdownEl.textContent =
+          `残り時間：${String(hours).padStart(2, '0')}時間 ${String(minutes).padStart(2, '0')}分 ${String(seconds).padStart(2, '0')}秒`;
+        if (remaining > 0) {
+          setTimeout(updateCountdown, 1000);
+        } else {
+          countdownEl.textContent = "期限を過ぎました。";
+        }
+      }
+      updateCountdown();
     }
 
     document.getElementById('surveyForm').addEventListener('submit', function(e) {
@@ -106,5 +186,6 @@
       }
     });
   </script>
+
 </body>
 </html>
